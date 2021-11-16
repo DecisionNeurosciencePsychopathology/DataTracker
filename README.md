@@ -40,5 +40,5 @@ unmnt_remote_data("/ihome/adombrovski/tsb31/Bierka")
 h
 ```
 
-## For other developer
+## For other developers
 It is recommended that you clone this repo and make updates unique to your lab.
