@@ -234,14 +234,16 @@ lab.info <- function() {
   print("Execute '?lab.info' to read about our lab.")
 }
 
-library(dplyr)
-library(lubridate)
+#library(dplyr)
+#library(lubridate)
 #library(purrrlyr)
-library(REDCapR)
-library(R.utils)
 #library(tinsel)
 #library(redcapAPI)
 #library(yaml)
+library(tidyverse)
+library(REDCapR)
+library(R.utils)
+
 
 # source our decorators
 #tinsel::source_decoratees("decorators.R")
