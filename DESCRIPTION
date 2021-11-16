@@ -1,0 +1,12 @@
+Package: DataTracker
+Type: Package
+Title: DataTracker
+Version: 0.1.0
+Author: Shane Buckley
+Maintainer: The package maintainer <buckleyts3@upmc.edu>
+Description: Basic set of functions for data tracking, fetching, and
+    transformation for the DNPL.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.2
