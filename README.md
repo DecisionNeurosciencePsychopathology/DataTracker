@@ -29,7 +29,7 @@ lab_cfg <- lab.cfg()
 # view the config path
 lab_cfg
 # mount a remote data resource
-mnt_remote_data("/ihome/adombrovski/tsb31/Bierka", "Bierka", "/")
+mnt_remote_data("/ihome/adombrovski/tsb31/Bierka", "Bierka", "")
 # run a behavioral data check
 h <- have_data(cfg='/ihome/adombrovski/tsb31/Bierka/datamesh/behav/redcap3.json', modality='behavior', 
 protocol='bsocial', task='trust', data_path='/ihome/adombrovski/tsb31/Bierka/behav', 
