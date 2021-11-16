@@ -1095,8 +1095,10 @@ have_data <- function(cfg, modality, local_root='', data_path=NA,
       in_args[["modality"]] <- NULL
       # drop drop_failed from our arguments
       in_args[["drop_failed"]] <- NULL
+      print(in_args)
       # get the execution string
       call_func <- paste0('have_', modality, '_data')
+      print(call_func)
       # executes 'have_<modality>_data()'
       checked_data <- do.call(what=call_func, args=in_args)
       # if orig_ids is given and no NAs exist in the given list
