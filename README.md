@@ -10,7 +10,7 @@ install_github('DecisionNeurosciencePsychopathology/DataTracker')
 ```r
 lab.cfg()
 ```
-(This will retrurn the path to the lab's config file.)
+(This will return the path to the lab's config file.)
 
 ## For useful information
 ```r
