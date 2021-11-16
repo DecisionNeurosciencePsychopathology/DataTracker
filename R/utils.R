@@ -1589,6 +1589,8 @@ get_id_path_grepl_count <- function(full_path, requirement) {
 #' subjects and whether or not they have complete behavioral data.
 have_behavior_data <- function(cfg, protocol, task, local_root='',
                                 data_path=NA, my_required=NA) {
+  print(data_path)
+  print(local_root)
   # get the required data
   required <- get_task_completion_requirements(cfg=cfg, task=task,
                                                modality="behavior")
