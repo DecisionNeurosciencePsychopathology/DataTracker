@@ -1,11 +1,11 @@
 # DataTracker
 
 ## To Install this package
-library(devtools)
+library(devtools)\n
 install_github('DecisionNeurosciencePsychopathology/DataTracker')
 
 ## For useful information
-?lab.info
+?lab.info\n
 (Hit 'q' to exit the documentation while in console)
 
 ## For other developer
