@@ -20,6 +20,24 @@ lab.cfg()
 
 ## Example
 ```r
+# load tidyverse
+library(tidyverse)
+# load the DataTracker library
+library(DataTracker)
+# get the lab's config file path
+lab_cfg <- lab.cfg()
+# view the config path
+lab_cfg
+# mount a remote data resource
+mnt_remote_data("/ihome/adombrovski/tsb31/Bierka", "Bierka", "/")
+# run a behavioral data check
+h <- have_data(cfg='/ihome/adombrovski/tsb31/Bierka/datamesh/behav/redcap3.json', modality='behavior', 
+protocol='bsocial', task='trust', data_path='/ihome/adombrovski/tsb31/Bierka/behav', 
+my_required = c("edat_scan", "text_scan"), drop_failed=TRUE)
+# unmount the remote resource
+unmnt_remote_data("/ihome/adombrovski/tsb31/Bierka")
+# view your resultant dataframe
+h
 ```
 
 ## For other developer
