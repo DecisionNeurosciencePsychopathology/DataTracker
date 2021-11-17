@@ -18,7 +18,7 @@ lab.cfg()
 ```
 (Hit 'q' to exit the documentation while in console.)
 
-## Example
+## Example for Checking Behavioral Data
 ```r
 # load tidyverse
 library(tidyverse)
@@ -30,10 +30,18 @@ lab_cfg <- lab.cfg()
 lab_cfg
 # mount a remote data resource
 mnt_remote_data("/ihome/adombrovski/tsb31/Bierka", "Bierka", "")
-# run a behavioral data check
-h <- have_data(cfg='/ihome/adombrovski/tsb31/Bierka/datamesh/behav/redcap3.json', modality='behavior', 
-protocol='bsocial', task='trust', data_path='/ihome/adombrovski/tsb31/Bierka/behav', 
-my_required = c("edat_scan", "text_scan"), drop_failed=TRUE)
+# running a behavioral data check
+h <- have_data(cfg=lab_cfg, modality='behavior', protocol='bsocial', task='trust', 
+  local_root='/ihome/adombrovski/tsb31/Bierka/datamesh/behav', 
+  my_required = c("edat_scan", "text_scan"), drop_failed=TRUE)
+## Or if you want to use a personalized config file
+# h <- have_data(cfg='/ihome/adombrovski/tsb31/Bierka/datamesh/behav/redcap3.json', modality='behavior', 
+#  protocol='bsocial', task='trust', local_root='/ihome/adombrovski/tsb31/Bierka', 
+#  my_required = c("edat_scan", "text_scan"), drop_failed=TRUE, data_path='datamesh/behav/trust_bsocial')
+## Or if you want to explicity define the data path ##
+# h <- have_data(cfg='/ihome/adombrovski/tsb31/Bierka/datamesh/behav/redcap3.json', modality='behavior', 
+#  protocol='bsocial', task='trust', local_root='/ihome/adombrovski/tsb31/Bierka', 
+#  my_required = c("edat_scan", "text_scan"), drop_failed=TRUE)
 # unmount the remote resource
 unmnt_remote_data("/ihome/adombrovski/tsb31/Bierka")
 # view your resultant dataframe
