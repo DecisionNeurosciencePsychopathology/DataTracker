@@ -237,11 +237,12 @@ lab.info <- function() {
 }
 
 #library(dplyr)
-#library(lubridate)
 #library(purrrlyr)
 #library(tinsel)
 #library(redcapAPI)
 #library(yaml)
+library(assertthat)
+library(lubridate)
 library(tidyverse)
 library(REDCapR)
 library(reticulate)
@@ -1638,8 +1639,13 @@ have_behavior_data <- function(cfg, protocol, task, local_root='',
   return(have_required_data)
 }
 
+#' Below imaging data functions will probably have to be unique per protocol
+#' and/or task.
+#' ^ Actually, probably not...seems to be formatted the same because of
+#' downloading methods...
+
 #' Function to check for existence of legacy scanning data.
-get_meson_data <- function(cfg, protocol, task, local_root='',
+have_meson_data <- function(cfg, protocol, task, local_root='',
                            data_path=NA) {
 
 }
@@ -1647,14 +1653,20 @@ get_meson_data <- function(cfg, protocol, task, local_root='',
 #' Function to check for existence of xnat scanning data.
 #' Specifically, this will be data downloaded with the DNPL's
 #' fork of DAX.
-get_dax_data <- function(cfg, protocol, task, local_root='', data_path=NA) {
+have_dax_data <- function(cfg, protocol, task, local_root='', data_path=NA) {
 
 }
 
 #' Function that checks for existence of xnat scanning data and then
 #' checks meson data for anything not found.
-get_dax_meson_data <- function(cfg, protocol, task,  local_root='',
+have_daxmeson_data <- function(cfg, protocol, task,  local_root='',
                                xnat_path=NA, meson_path=NA) {
+
+}
+
+#' Function to check for existence of bids data.
+get_bids_data <- function(cfg, protocol, task, local_root='',
+                           data_path=NA) {
 
 }
 
