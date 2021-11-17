@@ -9,7 +9,8 @@ remnt_remote_data(
   remote_name,
   remote_path,
   attempt = 1,
-  max_attempts = 5
+  max_attempts = 5,
+  sleep = 5
 )
 }
 \arguments{
@@ -18,6 +19,12 @@ remnt_remote_data(
 \item{remote_name}{is the name of the configured rclone remote.}
 
 \item{remote_path}{is the path to the remote directory to mount locally.}
+
+\item{attempt}{sets the attempt number you are on.}
+
+\item{max_attempts}{sets the max number of mount attempts.}
+
+\item{sleep}{number of seconds to sleep in between mount attempts.}
 }
 \description{
 Function to remount data: runs an unmount following by a mount.

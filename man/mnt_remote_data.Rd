@@ -10,7 +10,8 @@ mnt_remote_data(
   remote_path,
   attempt = 1,
   max_attempts = 5,
-  trap = FALSE
+  trap = FALSE,
+  sleep = 5
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ mnt_remote_data(
 \item{max_attempts}{sets the max number of mount attempts.}
 
 \item{trap}{if set to TRUE, the mount will not persist after the session.}
+
+\item{sleep}{number of seconds to sleep in between mount attempts.}
 }
 \description{
 This can be used to mount SharePoint or any other cloud resource as if

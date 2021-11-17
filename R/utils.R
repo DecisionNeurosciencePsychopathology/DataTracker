@@ -229,6 +229,8 @@
 #'     Pitt's chosen cloud storage provided as of 2021.
 #'
 #' -----------------------------------------------------------------------------
+#' @examples
+#' ?lab.cfg
 #' @export
 lab.info <- function() {
   print("Execute '?lab.info' to read about our lab.")
@@ -242,6 +244,7 @@ lab.info <- function() {
 #library(yaml)
 library(tidyverse)
 library(REDCapR)
+library(reticulate)
 library(R.utils)
 
 
@@ -339,16 +342,20 @@ unmnt_remote_data <- function(mnt_path) {
 #' @param mnt_path is the directory to try and remount.
 #' @param remote_name is the name of the configured rclone remote.
 #' @param remote_path is the path to the remote directory to mount locally.
+#' @param attempt sets the attempt number you are on.
+#' @param max_attempts sets the max number of mount attempts.
+#' @param sleep number of seconds to sleep in between mount attempts.
 #' @examples
 #' remnt_remote_data(mnt_path="/Users/bob/mnt", "Bob_OneDrive", "Documents")
 #' @export
 remnt_remote_data <- function(mnt_path, remote_name, remote_path,
-                              attempt=1, max_attempts=5) {
+                              attempt=1, max_attempts=5, sleep=5) {
   # run an unmount
   unmnt_remote_data(mnt_path)
   # attempt a mount
   mnt_result <- mnt_remote_data(mnt_path, remote_name, remote_path,
-                                attempt=attempt, max_attempts=max_attempts)
+                                attempt=attempt, max_attempts=max_attempts,
+                                sleep=sleep)
   # return the mount result: TRUE if mounted, FALSE if the mount failed
   return(mnt_result)
 }
@@ -356,10 +363,10 @@ remnt_remote_data <- function(mnt_path, remote_name, remote_path,
 #' Function to check that the mount succeeded or
 #' increment attempt and run again.
 mnt_attempt_check <- function(mnt_path, remote_name, remote_path, attempt,
-                              max_attempts, trap) {
+                              max_attempts, trap, sleep) {
   # check the mount status
   new_mnt_status <- is.mounted(mnt_path)
-  # connvert "bad mount" status to FALSE
+  # convert "bad mount" status to FALSE
   if(new_mnt_status == "bad mount") {
     new_mnt_status = FALSE
   }
@@ -371,9 +378,11 @@ mnt_attempt_check <- function(mnt_path, remote_name, remote_path, attempt,
     if(new_attempt < max_attempts + 1) {
       # Note that the previous attempt failed
       print(paste0("Mount failed on attempt: ", toString(attempt), "..."))
+      # sleep before next attempt
+      Sys.sleep(sleep)
       # try the mount again recursively
       mnt_remote_data(mnt_path, remote_name, remote_path, new_attempt,
-                      max_attempts)
+                      max_attempts, trap, sleep)
     # otherwise, we have already reached the max number of retries
     } else {
       # Note that the max number of mount attempts was reached
@@ -459,11 +468,12 @@ remove_ds_store <- function(mnt_path) {
 #' @param attempt sets the attempt number you are on.
 #' @param max_attempts sets the max number of mount attempts.
 #' @param trap if set to TRUE, the mount will not persist after the session.
+#' @param sleep number of seconds to sleep in between mount attempts.
 #' @examples
 #' mnt_remote_data(mnt_path="/Users/bob/mnt", "Bob_OneDrive", "Documents")
 #' @export
 mnt_remote_data <- function(mnt_path, remote_name, remote_path, attempt=1,
-                            max_attempts=5, trap=FALSE) {
+                            max_attempts=5, trap=FALSE, sleep=5) {
   # Note the attempt number to user
   print(paste0("Attempt ", toString(attempt)))
   # if this is a mac
@@ -508,10 +518,11 @@ mnt_remote_data <- function(mnt_path, remote_name, remote_path, attempt=1,
   } else if(mnt_status == 'bad mount'){
     # attempt a remount
     tryCatch({
-      # try remount
+      # try remount, trapm explicity set to FALSE, should only be called on
+      # final check
       remnt_result <- remnt_remote_data(mnt_path, remote_name, remote_path,
                                         attempt=attempt,
-                                        max_attempts=max_attempts, trap=trap)
+                                        max_attempts=max_attempts, trap=FALSE)
       # return the result
       return(remnt_result)
     # if the remount fails

@@ -11,7 +11,8 @@ mnt_attempt_check(
   remote_path,
   attempt,
   max_attempts,
-  trap
+  trap,
+  sleep
 )
 }
 \description{
