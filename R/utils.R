@@ -510,7 +510,8 @@ mnt_remote_data <- function(mnt_path, remote_name, remote_path, attempt=1,
       # will also run another attempt if one is needed and
       # max attempts not reached
       final_check <- mnt_attempt_check(mnt_path, remote_name, remote_path,
-                                       attempt, max_attempts, trap=trap)
+                                       attempt, max_attempts, trap=trap,
+                                       sleep=sleep)
       # return the status of our final check
       return(final_check)
     })
@@ -535,7 +536,8 @@ mnt_remote_data <- function(mnt_path, remote_name, remote_path, attempt=1,
       # will also run another attempt if one is needed and
       # max attempts not reached
       final_check <- mnt_attempt_check(mnt_path, remote_name, remote_path,
-                                       attempt, max_attempts, trap=trap)
+                                       attempt, max_attempts, trap=trap,
+                                       sleep=sleep)
       # return the status of our final check
       return(final_check)
     })
