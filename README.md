@@ -48,5 +48,20 @@ unmnt_remote_data("/ihome/adombrovski/tsb31/Bierka")
 h
 ```
 
+## Example for running a demographic report for Bsocial Trust
+```r
+# run the initial demographic
+run_demographic_report(cfg="/Volumes/bierka_root/datamesh/behav/redcap3.json", protocol="bsocial", task="trust", load_env=TRUE)
+# get the behavioral data check
+h <- have_data(cfg='/Volumes/bierka_root/datamesh/behav/redcap3.json', modality='behavior', protocol='bsocial', task='trust', local_root='/Volumes/bierka_root', my_required = c("edat_scan", "text_scan"), drop_failed=TRUE)
+# drop those without data from the initial demographic
+trust_bsocial_w_behav <- bsocial_trust_data %>% filter(id %in% h$id)
+# report the subjects without behavioral data
+print("These ids either did not have behavioral data or did not match as a real subject id.")
+print(setdiff(bsocial_trust_data$id, trust_bsocial_w_behav$id))
+# generate the demographic data for those with behavioral data
+behav_demo_trust_bsocial <- get_demo(trust_bsocial_w_behav, defined_groups=c('HL', 'LL', 'HC', 'NON'))
+```
+
 ## For other developers
 It is recommended that you clone this repo and make updates unique to your lab.
