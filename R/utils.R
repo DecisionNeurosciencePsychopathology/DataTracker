@@ -1665,7 +1665,7 @@ have_daxmeson_data <- function(cfg, protocol, task,  local_root='',
 }
 
 #' Function to check for existence of bids data.
-get_bids_data <- function(cfg, protocol, task, local_root='',
+have_bids_data <- function(cfg, protocol, task, local_root='',
                            data_path=NA) {
 
 }
