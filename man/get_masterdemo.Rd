@@ -3,20 +3,20 @@
 \name{get_masterdemo}
 \alias{get_masterdemo}
 \title{#' Convenience function to install Rclone
-install_rclone <- function(module=FALSE) {
+#' @return Boolean representing if rclone was successfully installed.
+#' @examples
+#' rclone.installed()
+#' @export
+install_rclone <- function() {
   # check that rclone is installed
   is_installed <- rclone.installed()
   # if rclone is not installed
   if(is_installed == FALSE) {
-    # if doing a root user install
-    if(module == FALSE) {
-      install_str <- "curl https://rclone.org/install.sh | sudo bash"
-        # otherwise, assume loading as a module
-    } else {
-      install_str <- "module load rclone"
-    }
-    # command to run on the system
+    # install string from rclone docs
+    install_str <- "curl https://rclone.org/install.sh | sudo bash"
+    # run the command on the system
     system(install_str, intern=TRUE)
+    # check that rclone was successfully installed
   }
 }
 Function to create a REDCapR project from json input for master demographic.}
@@ -31,20 +31,20 @@ Returns an object to pull Master Demographic data with.
 }
 \description{
 #' Convenience function to install Rclone
-install_rclone <- function(module=FALSE) {
+#' @return Boolean representing if rclone was successfully installed.
+#' @examples
+#' rclone.installed()
+#' @export
+install_rclone <- function() {
   # check that rclone is installed
   is_installed <- rclone.installed()
   # if rclone is not installed
   if(is_installed == FALSE) {
-    # if doing a root user install
-    if(module == FALSE) {
-      install_str <- "curl https://rclone.org/install.sh | sudo bash"
-        # otherwise, assume loading as a module
-    } else {
-      install_str <- "module load rclone"
-    }
-    # command to run on the system
+    # install string from rclone docs
+    install_str <- "curl https://rclone.org/install.sh | sudo bash"
+    # run the command on the system
     system(install_str, intern=TRUE)
+    # check that rclone was successfully installed
   }
 }
 Function to create a REDCapR project from json input for master demographic.

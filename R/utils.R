@@ -237,38 +237,121 @@ lab.info <- function() {
 }
 
 #library(dplyr)
+#library(jsonify)
 #library(purrrlyr)
 #library(tinsel)
 #library(redcapAPI)
 #library(yaml)
 library(assertthat)
+require(httr)
+library(jsonlite)
 library(lubridate)
 library(tidyverse)
 library(REDCapR)
 library(reticulate)
+require(rlist)
 library(R.utils)
 
+## GLOBAL VARIABLES ##
+
+lab_name <- "DNPL"
 
 # source our decorators
 #tinsel::source_decoratees("decorators.R")
 
 #' Small function to get the default lab config path
+#' @description
+#' Attempts to get path from ~/DNPL.json, then from either the default
+#' environment variable name DNPL or another environment variable.
 #' @param cfg_env is the environment variable to the config file.
 #' @return The lab config file path as a string.
 #' @examples
 #' lab.cfg()
 #' @export
 lab.cfg <- function(cfg_env=NA) {
-  # if the cfg_env is unset
-  if(is.na(cfg_env) == TRUE) {
-    cfg_path <- Sys.getenv("DNPL")
-  # otherwise
-  } else {
-    # use the user specified environment variable
-    cfg_path <- Sys.getenv(cfg_env)
-  }
+  # first try to get cfg from a dot file in user space
+  cfg_path <- tryCatch({
+    # get the path for the user's local lab config file if set
+    json_path <- path.expand(paste0('~/.', lab_name, '.json'))
+    # load the string
+    cfg_path_attempt <- jsonlite::read_json(json_path)[[1]]
+    # return the attempt
+    return(cfg_path_attempt)
+  # second try to get the cfg path from an environment variable
+  }, error = function(x) {
+    # if the cfg_env is unset
+    if(is.na(cfg_env) == TRUE) {
+      # Note to the user we are trying to get this
+      print(paste0("Trying to get the path from the environment variable: ",
+                   lab_name, "."))
+      # try to get the default lab config
+      cfg_path_attempt <- Sys.getenv(lab_name)
+      # otherwise, try with the
+    } else {
+      # Note to the user we are trying to get this
+      print(paste0("Trying to get the path from the environment variable: ",
+                   cfg_env, "."))
+      # use the user specified environment variable
+      cfg_path_attempt <- Sys.getenv(cfg_env)
+    }
+    # if an empty string is returned
+    if(cfg_path_attempt == "") {
+      # Note this to the user
+      print("Environment variable has not been set.")
+      # convert to NA
+      cfg_path_attempt <- NA
+    }
+    # return the attempt
+    return(cfg_path_attempt)
+  })
   # return the config file path
   return(cfg_path)
+}
+
+#' Function to set the lab config file.
+#' @description
+#' Sets the path to the lab's configuration file. Assumes the lab
+#' is set to the global R environment variable "lab_name" defined
+#' in this package. If setting up a new lab, override with by setting
+#' my_lab. If you are using the same config as the global lab, it is
+#' fine to just set my_lab. If you are creating a new lab config file,
+#' use the lab_cfg_path variable.
+#' @param my_lab Is the name associated with the lab/project.
+#' @param lab_cfg_path Is where you would like this new config to be saved.
+#' @export
+set_lab.cfg <- function(my_lab=NA, lab_cfg_path=NA) {
+  # if a lab is not specified
+  if(is.na(my_lab)) {
+    # then use the lab name given by this package
+    lab <- lab_name
+  # otherwise
+  } else {
+    # use the lab name given
+    lab <- my_lab
+  }
+  # if there is not lab_cfg_path given
+  if(is.na(lab_cfg_path)) {
+    # start by trying to pull it from the global variable set for the lab
+    cfg_path <- Sys.getenv(lab_name)
+    # if this returns an empty string (is not set)
+    if(cfg_path == "") {
+      # Note this to the user
+      print("The environment variable for this lab is not set, you must provide one.")
+    }
+  # otherwise
+  } else {
+    # use the lab config path given
+    cfg_path <- lab_cfg_path
+  }
+  # get the path for the user's local lab config file if set
+  json_path <- path.expand(paste0('~/.', lab, '.json'))
+  # if the json path exists
+  if(file.exists(json_path)) {
+    # delete the file to overwrite it
+    file.remove(json_path)
+  }
+  # write to the file
+  jsonlite::write_json(as.list(cfg_path), json_path, auto_unbox=TRUE)
 }
 
 #' Small function to get OS string identifier.
@@ -278,6 +361,225 @@ lab.cfg <- function(cfg_env=NA) {
 #' @export
 os.is <- function() {
   return(Sys.info()['sysname'][[1]])
+}
+
+#' Simple function to create/overwrite GitHub credentials
+#' @description
+#' To use this function:
+#' First, create a GitHub account.
+#' https://github.com/
+#' Next, create a GitHub access token.
+#' https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+#' Finally, request access to the DNPL GitHub.
+#' @param username Your GitHub username.
+#' @param token Your GitHub access token.
+#' @return FALSE if not set, TRUE if set.
+#' @examples
+#' set_github_creds(username=<username>, token=<token>)
+#' @export
+set_github_creds <- function(username=NA, token=NA) {
+  # try to set the credentials
+  final_out <- tryCatch({
+    # if either inputs are set to NA
+    if(is.na(username) || is.na(token)){
+      print("Both 'username' and 'token' must be set.")
+      # return FALSE
+      return(FALSE)
+    # otherwise, save/overwrite a file under ~/.github_creds.json
+    } else {
+      # create a vector of the username, then the token
+      cred_list <- list(username, token)
+      # apply names to the list
+      names(cred_list) <- c("username", "token")
+      # get the path to save the file to
+      json_path <- path.expand('~/.github_creds.json')
+      # if the json path exists
+      if(file.exists(json_path)) {
+        # delete the file to overwrite it
+        file.remove(json_path)
+      }
+      # write to the file
+      jsonlite::write_json(cred_list, json_path, auto_unbox=TRUE)
+      # if we made it this far, completed successfully, return TRUE
+      return(TRUE)
+    }
+  }, error = function(e) {
+    print("Unable to setup GitHub credentials.")
+    return(FALSE)
+  })
+  # return the final output
+  return(final_out)
+}
+
+#' Function to grab the user's GitHub credentials
+#' @description
+#' Tries to get the GitHub credentials from a small file under the path
+#' '~/.github_creds.json'.
+#' @return the credentials or NA if not found.
+#' @examples
+#' set_github_creds()
+#' @export
+get_github_creds <- function() {
+  # get the path to save the file to
+  json_path <- path.expand('~/.github_creds.json')
+  # try to get the creds
+  creds <- tryCatch({
+    # if the file exists
+    if(file.exists(json_path)) {
+      # get the creds from the json file
+      file_creds <- jsonlite::read_json(json_path)
+      # return the creds
+      return(file_creds)
+    # otherwise
+    } else {
+      # Note this to the user
+      print("Credentials file '", json_path, "' was not found.")
+      print("Credentials can be set using the 'set_github_creds' function.")
+      # return NA
+      return(NA)
+    }
+  }, error = function(e) {
+    # Note this to the user
+    print("Unable to get the GitHub credentials.")
+    # return NA
+    return(NA)
+  })
+  # return the creds
+  return(creds)
+}
+
+#' Function to fetch files from GitHub.
+#' @description
+#' Modified from:
+#' https://gist.github.com/ritchieking/5de10cde6b46f3536967a908fe806b5f
+#' @param repo Is the name of the repository.
+#' @param path Is the path in the repo to the file.
+#' @param gh_root If set to "" will try to access the file from your saved
+#' GitHub username. If a group is given, will attempt to fetch from that another
+#' GitHub account or organization.
+#' @return The file as raw text from a GitHub repo.
+#' @examples
+#' raw_file <- fetch_github_data(repo="Lab_Configs",
+#'   path="datatracker/lab_cfg.json",
+#'   gh_root="DecisionNeurosciencePsychopathology")
+#' @export
+fetch_github_data <- function(repo, path, gh_root="") {
+  # get GitHub credentials
+  creds <- get_github_creds()
+  print(creds)
+  # get username/group
+  if(gh_root == "") {
+    # use the username from the config file
+    gh_root <- creds$username
+  }
+  # authenticate credentials for the request
+  auth <- authenticate(creds$username, creds$token)
+  # Seperate the filename from the directory
+  match <- regexpr("^(.*[\\/])", path)
+  if (match[1] > 0) {
+    dir <- path %>% substring(match[1], attr(match, "match.length"))
+    file <- path %>% substring(attr(match, "match.length") + 1, nchar(path))
+  } else {
+    dir <- ""
+    file <- path
+  }
+  # To handle files larger than 1MB, use this trick:
+  # https://medium.com/@caludio/how-to-download-large-files-from-github-4863a2dbba3b
+  req_meta <-
+    content(
+      GET(
+        paste("https://api.github.com/repos", gh_root, repo,
+              "contents", dir, sep="/"),
+        auth
+      )
+    )
+  entry <- req_meta %>% list.filter(name == file)
+  sha <- entry[1][[1]]$sha
+  # Grab contents, using sha as a reference
+  req_blob <- GET(
+    paste("https://api.github.com/repos", gh_root, repo,
+          "git/blobs", sha, sep="/"),
+    auth
+  )
+  # Need to decode the contents, which are returned in base64
+  raw_file_str <- content(req_blob)$content %>%
+    base64_dec() %>%
+    rawToChar()
+  return(raw_file_str)
+}
+
+#' Function to get and set an rclone config file.
+#' @param repo Is the name of the repository.
+#' @param path Is the path in the repo to the file.
+#' @param gh_root If set to "" will try to access the file from your saved
+fetch_rclone_cfg <- function(repo, path, gh_root="") {
+  # get the file text from a remote GitHub
+  raw_rclone_txt <- fetch_github_data(repo, path, gh_root)
+  # get the local file path to save it under
+  rclone_cfg_path <- path.expand("~/.config/rclone/rclone.conf")
+  # make the .config/rclone dirs if they do not exists
+
+  # if the file currently exists
+  if(file.exists(rclone_cfg_path)) {
+    # delete the old file
+    file.remove(rclone_cfg_path)
+  }
+  # write the rclone config file
+  write_file(raw_rclone_txt, rclone_cfg_path)
+}
+
+#' Function to fetch and set the datatracker config files.
+#' @param repo Is the name of the repository.
+#' @param path Is the path in the repo to the file.
+#' @param gh_root If set to "" will try to access the file from your saved
+#' @param save_to Is the path to save the datatracker config to.
+#' @param set_lab Is if you are setting up a new lab/project.
+fetch_datatracker_cfg <- function(repo, path, gh_root="",
+                                  save_to=NA, set_lab=NA) {
+  # if a path to save the file under is not given
+  if(is.na(save_to)) {
+    # set this to the home directory
+    save_to <- "~/"
+  }
+  # NOTE: saved_to path currently assumed to exist
+  # get the file text from a remote GitHub
+  raw_cfg_txt <- fetch_github_data(repo, path, gh_root)
+  # get the file name from the path given
+  file_name <- basename(path)
+  # get the local file path to save it under
+  datatracker_cfg_path <- path.expand(paste0(save_to, file_name))
+  # if the file currently exists
+  if(file.exists(datatracker_cfg_path)) {
+    # delete the old file
+    file.remove(datatracker_cfg_path)
+  }
+  # write the rclone config file
+  write_file(raw_cfg_txt, datatracker_cfg_path)
+  # if setting this as a lab's config
+  if(is.na(set_lab) == FALSE) {
+    # set the lab cfg to this new json file
+    set_lab.cfg(my_lab=set_lab)
+  }
+}
+
+#' Function to be run to setup a base configuration for DNPL.
+#' @description
+#' This function sets up the user's GitHub credentials and then
+#' uses those credentials to configure Rclone and DataTracker.
+#' This function is specific to the DNPL at UPMC.
+#' @param github_uname Your GitHub username.
+#' @param github_token Your GitHub access token.
+#' @return FALSE if not set, TRUE if set.
+#' @examples
+#' set_github_creds(github_uname=<username>, github_token=<token>)
+#' @export
+DNPLsetup <- function(github_uname, github_token) {
+  # set the GitHub credentials
+  set_github_creds(username=github_uname, token=github_token)
+  # setup Rclone
+
+  # setup DataTracker
+
 }
 
 #' Function to check if the remote data is mounted.
@@ -571,6 +873,12 @@ rclone.installed <- function() {
     } else {
       # let the user know that rclone is not installed
       print("Rclone not installed.")
+      print("To install rclone on a personal machine, run the following:")
+      print("curl https://rclone.org/install.sh | sudo bash")
+      print("")
+      print("To install rclone on an HPC environment, run the following:")
+      print("module load rclone")
+      print("")
       # return FALSE
       return(FALSE)
     }
@@ -578,26 +886,32 @@ rclone.installed <- function() {
   }, error = function(e) {
     # let the user know that rclone is not installed
     print("Rclone not installed.")
+    print("To install rclone on a personal machine, run the following:")
+    print("curl https://rclone.org/install.sh | sudo bash")
+    print("")
+    print("To install rclone on an HPC environment, run the following:")
+    print("module load rclone")
+    print("")
     # return FALSE
     return(FALSE)
   })
 }
 
 #' #' Convenience function to install Rclone
-#' install_rclone <- function(module=FALSE) {
+#' #' @return Boolean representing if rclone was successfully installed.
+#' #' @examples
+#' #' rclone.installed()
+#' #' @export
+#' install_rclone <- function() {
 #'   # check that rclone is installed
 #'   is_installed <- rclone.installed()
 #'   # if rclone is not installed
 #'   if(is_installed == FALSE) {
-#'     # if doing a root user install
-#'     if(module == FALSE) {
-#'       install_str <- "curl https://rclone.org/install.sh | sudo bash"
-#'         # otherwise, assume loading as a module
-#'     } else {
-#'       install_str <- "module load rclone"
-#'     }
-#'     # command to run on the system
+#'     # install string from rclone docs
+#'     install_str <- "curl https://rclone.org/install.sh | sudo bash"
+#'     # run the command on the system
 #'     system(install_str, intern=TRUE)
+#'     # check that rclone was successfully installed
 #'   }
 #' }
 
@@ -1742,4 +2056,12 @@ get_explore2_clock_redcap <- function(data, cfg, ...) {
   return(data)
 }
 
+#' Function for mounting the NAS, Bierka.
+mount_Bierka <- function() {
 
+}
+
+#' Function for mounting DNPLskinner SharePoint.
+mount_Skinner <- function() {
+
+}

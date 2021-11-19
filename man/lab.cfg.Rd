@@ -13,7 +13,8 @@ lab.cfg(cfg_env = NA)
 The lab config file path as a string.
 }
 \description{
-Small function to get the default lab config path
+Attempts to get path from ~/DNPL.json, then from either the default
+environment variable name DNPL or another environment variable.
 }
 \examples{
 lab.cfg()
