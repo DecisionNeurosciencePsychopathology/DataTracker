@@ -474,7 +474,6 @@ get_github_creds <- function() {
 fetch_github_data <- function(repo, path, gh_root="") {
   # get GitHub credentials
   creds <- get_github_creds()
-  print(creds)
   # get username/group
   if(gh_root == "") {
     # use the username from the config file
@@ -602,21 +601,33 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
 #' This function is specific to the DNPL at UPMC.
 #' @param github_uname Your GitHub username.
 #' @param github_token Your GitHub access token.
+#' @param proj_name Is the name of your project, this will default to the lab's
+#' name if not specified.
 #' @param use_global_cfg If you are using a pre-set environment or
 #' starting your own based on the config file pulled.
-#' @return FALSE if not set, TRUE if set.
 #' @examples
 #' set_github_creds(github_uname=<username>, github_token=<token>)
 #' @export
-DNPLsetup <- function(github_uname, github_token, use_local_cfg=FALSE) {
+DNPLsetup <- function(github_uname, github_token, proj_name=NA,
+                      use_local_cfg=FALSE) {
   # set the GitHub credentials
   set_github_creds(username=github_uname, token=github_token)
   # setup Rclone (base Rclone setup for DNPL: Bierka and Skinner)
   fetch_rclone_cfg(repo="Lab_Configs", path="rclone/dnpl.conf",
                    gh_root="DecisionNeurosciencePsychopathology")
+  # if setting up a custom project
+  if(proj_name != FALSE) {
+    # set the name to what is given
+    my_name <- proj_name
+  # otherwise
+  } else {
+    # use the lab name
+    my_name <- lab_name()
+  }
   # setup DataTracker (base cfg file for the lab)
   fetch_datatracker_cfg(repo="Lab_Configs", path="datatracker/lab_cfg.json",
                         gh_root="DecisionNeurosciencePsychopathology",
+                        set_lab=my_name,
                         set_local=use_local_cfg)
   # Note to the user that the setup should be complete
   print("DNPL lab setup should be completed.")
@@ -1465,10 +1476,10 @@ have_data <- function(cfg, modality, local_root='', data_path=NA,
       in_args[["modality"]] <- NULL
       # drop drop_failed from our arguments
       in_args[["drop_failed"]] <- NULL
-      print(in_args)
+      #print(in_args)
       # get the execution string
       call_func <- paste0('have_', modality, '_data')
-      print(call_func)
+      #print(call_func)
       # executes 'have_<modality>_data()'
       checked_data <- do.call(what=call_func, args=in_args)
       # if orig_ids is given and no NAs exist in the given list
@@ -1961,8 +1972,8 @@ get_id_path_grepl_count <- function(full_path, requirement) {
 #' subjects and whether or not they have complete behavioral data.
 have_behavior_data <- function(cfg, protocol, task, local_root='',
                                 data_path=NA, my_required=NA) {
-  print(data_path)
-  print(local_root)
+  #print(data_path)
+  #print(local_root)
   # get the required data
   required <- get_task_completion_requirements(cfg=cfg, task=task,
                                                modality="behavior")
@@ -2070,7 +2081,7 @@ get_explore2_clock_redcap <- function(data, cfg, ...) {
   # NOTE: functions from the main script are used since they will already be
   # sourced into the global environment at this point
   # source the explore task function
-  source("protocols/explore.R")
+  #source("protocols/explore.R")
   # create an explore1 project
   exp1_proj <- get_project(cfg_path=cfg, protocol="explore")
   # get the explore1 fields
@@ -2097,11 +2108,55 @@ get_explore2_clock_redcap <- function(data, cfg, ...) {
 }
 
 #' Function for mounting the NAS, Bierka.
+#' @description
+#' This function is designed to mount Bierka to the user's home directory and
+#' should only be used with the lab's default configuration file.
+#' @export
 mount_Bierka <- function() {
-
+  # get the path to mount Bierka
+  bierka_path <- path.expand("~/Bierka")
+  # create the Bierka directory if it does not exist
+  tryCatch({
+    dir.create(bierka_path)
+  })
+  # mount the root of Bierka
+  mount_status <- mnt_remote_data(bierka_path, "Bierka", "")
+  # if the mount succeeded
+  if(mount_status == TRUE) {
+    # Note this to the user.
+    print("Bierka was successfully mounted.")
+  # otherwise
+  } else {
+    # Note the failed mount
+    print("Bierka failed to be mounted.")
+  }
+  # return the mount status
+  return(mount_status)
 }
 
 #' Function for mounting DNPLskinner SharePoint.
+#' @description
+#' This function is designed to mount Skinner to the user's home directory and
+#' should only be used with the lab's default configuration file.
+#' @export
 mount_Skinner <- function() {
-
+  # get the path to mount Skinner
+  skinner_path <- path.expand("~/Skinner")
+  # create the Skinner directory if it does not exist
+  tryCatch({
+    dir.create(skinner_path)
+  })
+  # mount the root of Skinner
+  mount_status <- mnt_remote_data(skinner_path, "Skinner", "skinner")
+  # if the mount succeeded
+  if(mount_status == TRUE) {
+    # Note this to the user.
+    print("Skinner was successfully mounted.")
+    # otherwise
+  } else {
+    # Note the failed mount
+    print("Skinner failed to be mounted.")
+  }
+  # return the mount status
+  return(mount_status)
 }

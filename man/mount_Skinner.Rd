@@ -7,5 +7,6 @@
 mount_Skinner()
 }
 \description{
-Function for mounting DNPLskinner SharePoint.
+This function is designed to mount Skinner to the user's home directory and
+should only be used with the lab's default configuration file.
 }

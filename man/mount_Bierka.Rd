@@ -7,5 +7,6 @@
 mount_Bierka()
 }
 \description{
-Function for mounting the NAS, Bierka.
+This function is designed to mount Bierka to the user's home directory and
+should only be used with the lab's default configuration file.
 }
