@@ -553,7 +553,7 @@ fetch_rclone_cfg <- function(repo, path, gh_root="") {
 #' @param set_lab Is if you are setting up a new lab/project.
 #' @export
 fetch_datatracker_cfg <- function(repo, path, gh_root="",
-                                  save_to=NA, set_lab=NA) {
+                                  save_to=NA, set_lab=NA, set_local=FALSE) {
   # if a path to save the file under is not given
   if(is.na(save_to)) {
     # set this to the home directory
@@ -578,10 +578,18 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
   }
   # write the datatracker config file
   write_file(raw_cfg_txt, datatracker_cfg_path)
+  # set the lab's configuration for the user
+  if(set_local == FALSE) {
+    my_cfg_path <- NA
+  # otherwise
+  } else {
+    # use the path of the file that was just created
+    my_cfg_path <- datatracker_cfg_path
+  }
   # if setting this as a lab's config
   if(is.na(set_lab) == FALSE) {
     # set the lab cfg to this new json file
-    set_lab.cfg(my_lab=set_lab)
+    set_lab.cfg(my_lab=set_lab, lab_cfg_path=my_cfg_path)
   }
 }
 
@@ -594,11 +602,13 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
 #' This function is specific to the DNPL at UPMC.
 #' @param github_uname Your GitHub username.
 #' @param github_token Your GitHub access token.
+#' @param use_global_cfg If you are using a pre-set environment or
+#' starting your own based on the config file pulled.
 #' @return FALSE if not set, TRUE if set.
 #' @examples
 #' set_github_creds(github_uname=<username>, github_token=<token>)
 #' @export
-DNPLsetup <- function(github_uname, github_token) {
+DNPLsetup <- function(github_uname, github_token, use_local_cfg=FALSE) {
   # set the GitHub credentials
   set_github_creds(username=github_uname, token=github_token)
   # setup Rclone (base Rclone setup for DNPL: Bierka and Skinner)
@@ -607,7 +617,7 @@ DNPLsetup <- function(github_uname, github_token) {
   # setup DataTracker (base cfg file for the lab)
   fetch_datatracker_cfg(repo="Lab_Configs", path="datatracker/lab_cfg.json",
                         gh_root="DecisionNeurosciencePsychopathology",
-                        set_lab=lab_name())
+                        set_local=use_local_cfg)
   # Note to the user that the setup should be complete
   print("DNPL lab setup should be completed.")
 }

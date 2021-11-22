@@ -4,12 +4,15 @@
 \alias{DNPLsetup}
 \title{Function to be run to setup a base configuration for DNPL.}
 \usage{
-DNPLsetup(github_uname, github_token)
+DNPLsetup(github_uname, github_token, use_local_cfg = FALSE)
 }
 \arguments{
 \item{github_uname}{Your GitHub username.}
 
 \item{github_token}{Your GitHub access token.}
+
+\item{use_global_cfg}{If you are using a pre-set environment or
+starting your own based on the config file pulled.}
 }
 \value{
 FALSE if not set, TRUE if set.

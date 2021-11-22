@@ -4,7 +4,14 @@
 \alias{fetch_datatracker_cfg}
 \title{Function to fetch and set the datatracker config files.}
 \usage{
-fetch_datatracker_cfg(repo, path, gh_root = "", save_to = NA, set_lab = NA)
+fetch_datatracker_cfg(
+  repo,
+  path,
+  gh_root = "",
+  save_to = NA,
+  set_lab = NA,
+  set_local = FALSE
+)
 }
 \arguments{
 \item{repo}{Is the name of the repository.}

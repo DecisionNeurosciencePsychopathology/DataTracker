@@ -6,6 +6,16 @@ Author: Shane Buckley
 Maintainer: The package maintainer <buckleyts3@upmc.edu>
 Description: Basic set of functions for data tracking, fetching, and
     transformation for the DNPL.
+Depends:
+    assertthat,
+    httr,
+    jsonlite,
+    lubridate,
+    tidyverse,
+    REDCapR,
+    reticulate,
+    rlist,
+    R.utils
 Imports:
     assertthat,
     httr,
