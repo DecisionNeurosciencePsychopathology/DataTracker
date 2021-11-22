@@ -32,8 +32,8 @@ DNPLsetup(<your username>, <your token>, use_local_cfg=TRUE)
 library(DataTracker)
 # NOTE: you need to run DNPLsetup() before running the following.
 
-# mount Bierka
-mount_Bierka()
+# mount Skinner
+mount_Skinner()
 # run a behavioral data check
 h <- have_data(cfg=lab.cfg(), modality='behavior', protocol='bsocial', task='trust', 
   local_root=path.expand('~'), my_required = c("edat_scan", "text_scan"), drop_failed=TRUE)
