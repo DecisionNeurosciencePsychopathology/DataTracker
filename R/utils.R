@@ -565,8 +565,12 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
   file_name <- basename(path)
   # get the local file path to save it under
   datatracker_cfg_path <- path.expand(paste0(save_to, file_name))
-  # make the dirs if they do not exists
-  dir.create(dirname(datatracker_cfg_path), recursive=TRUE)
+  # wrap this in a try statement to at least attempt for directories above this
+  # one.
+  tryCatch({
+    # make the dirs if they do not exists
+    dir.create(save_to, recursive=TRUE)
+  })
   # if the file currently exists
   if(file.exists(datatracker_cfg_path)) {
     # delete the old file
@@ -603,7 +607,7 @@ DNPLsetup <- function(github_uname, github_token) {
   # setup DataTracker (base cfg file for the lab)
   fetch_datatracker_cfg(repo="Lab_Configs", path="datatracker/lab_cfg.json",
                         gh_root="DecisionNeurosciencePsychopathology",
-                        set_lab=TRUE)
+                        set_lab=lab_name())
   # Note to the user that the setup should be complete
   print("DNPL lab setup should be completed.")
 }
