@@ -17,6 +17,8 @@ FALSE if not set, TRUE if set.
 \description{
 This function sets up the user's GitHub credentials and then
 uses those credentials to configure Rclone and DataTracker.
+Before using this function, you need to create a GitHub account,
+create a GitHub access token, and be added to the Lab's GitHub.
 This function is specific to the DNPL at UPMC.
 }
 \examples{

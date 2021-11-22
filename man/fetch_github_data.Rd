@@ -21,6 +21,9 @@ The file as raw text from a GitHub repo.
 \description{
 Modified from:
 https://gist.github.com/ritchieking/5de10cde6b46f3536967a908fe806b5f
+This is a general function for fetching data from GitHub. This makes it
+possible to host small amounts of configuration data and parameters on the
+web by hosting it in a repo.
 }
 \examples{
 raw_file <- fetch_github_data(repo="Lab_Configs",

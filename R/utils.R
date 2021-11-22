@@ -275,6 +275,8 @@ lab.cfg <- function(cfg_env=NA) {
     json_path <- path.expand(paste0('~/.', lab_name, '.json'))
     # load the string
     cfg_path_attempt <- jsonlite::read_json(json_path)[[1]]
+    # Note to the user we are using the personal json config
+    print("Using the config file given by the user's settings.")
     # return the attempt
     return(cfg_path_attempt)
   # second try to get the cfg path from an environment variable
@@ -452,6 +454,9 @@ get_github_creds <- function() {
 #' @description
 #' Modified from:
 #' https://gist.github.com/ritchieking/5de10cde6b46f3536967a908fe806b5f
+#' This is a general function for fetching data from GitHub. This makes it
+#' possible to host small amounts of configuration data and parameters on the
+#' web by hosting it in a repo.
 #' @param repo Is the name of the repository.
 #' @param path Is the path in the repo to the file.
 #' @param gh_root If set to "" will try to access the file from your saved
@@ -509,16 +514,22 @@ fetch_github_data <- function(repo, path, gh_root="") {
 }
 
 #' Function to get and set an rclone config file.
+#' @description
+#' This is a more specific function for fetching and saving an rclone config
+#' file from a private GitHub repo and saving it under the appropriate path to
+#' be usable by rclone, thus only requiring a one-time setup and then fetching
+#' the config file.
 #' @param repo Is the name of the repository.
 #' @param path Is the path in the repo to the file.
 #' @param gh_root If set to "" will try to access the file from your saved
+#' @export
 fetch_rclone_cfg <- function(repo, path, gh_root="") {
   # get the file text from a remote GitHub
   raw_rclone_txt <- fetch_github_data(repo, path, gh_root)
   # get the local file path to save it under
   rclone_cfg_path <- path.expand("~/.config/rclone/rclone.conf")
   # make the .config/rclone dirs if they do not exists
-
+  dir.create(dirname(rclone_cfg_path), recursive=TRUE)
   # if the file currently exists
   if(file.exists(rclone_cfg_path)) {
     # delete the old file
@@ -529,11 +540,15 @@ fetch_rclone_cfg <- function(repo, path, gh_root="") {
 }
 
 #' Function to fetch and set the datatracker config files.
+#' @description
+#' Function for getting a config file from GitHub. They can be given a specific
+#' path to be saved to, or set as the user's default lab configuration.
 #' @param repo Is the name of the repository.
 #' @param path Is the path in the repo to the file.
 #' @param gh_root If set to "" will try to access the file from your saved
 #' @param save_to Is the path to save the datatracker config to.
 #' @param set_lab Is if you are setting up a new lab/project.
+#' @export
 fetch_datatracker_cfg <- function(repo, path, gh_root="",
                                   save_to=NA, set_lab=NA) {
   # if a path to save the file under is not given
@@ -541,19 +556,20 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
     # set this to the home directory
     save_to <- "~/"
   }
-  # NOTE: saved_to path currently assumed to exist
   # get the file text from a remote GitHub
   raw_cfg_txt <- fetch_github_data(repo, path, gh_root)
   # get the file name from the path given
   file_name <- basename(path)
   # get the local file path to save it under
   datatracker_cfg_path <- path.expand(paste0(save_to, file_name))
+  # make the dirs if they do not exists
+  dir.create(dirname(datatracker_cfg_path), recursive=TRUE)
   # if the file currently exists
   if(file.exists(datatracker_cfg_path)) {
     # delete the old file
     file.remove(datatracker_cfg_path)
   }
-  # write the rclone config file
+  # write the datatracker config file
   write_file(raw_cfg_txt, datatracker_cfg_path)
   # if setting this as a lab's config
   if(is.na(set_lab) == FALSE) {
@@ -566,6 +582,8 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
 #' @description
 #' This function sets up the user's GitHub credentials and then
 #' uses those credentials to configure Rclone and DataTracker.
+#' Before using this function, you need to create a GitHub account,
+#' create a GitHub access token, and be added to the Lab's GitHub.
 #' This function is specific to the DNPL at UPMC.
 #' @param github_uname Your GitHub username.
 #' @param github_token Your GitHub access token.
@@ -576,10 +594,12 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
 DNPLsetup <- function(github_uname, github_token) {
   # set the GitHub credentials
   set_github_creds(username=github_uname, token=github_token)
-  # setup Rclone
-
-  # setup DataTracker
-
+  # setup Rclone (base Rclone setup for DNPL: Bierka and Skinner)
+  fetch_rclone_cfg(repo="Lab_Configs", path="rclone/dnpl.conf",
+                   gh_root="DecisionNeurosciencePsychopathology")
+  # setup DataTracker (base cfg file for the lab)
+  fetch_datatracker_cfg(repo="Lab_Configs", path="datatracker/lab_cfg.json",
+                        gh_root="DecisionNeurosciencePsychopathology")
 }
 
 #' Function to check if the remote data is mounted.
@@ -826,7 +846,7 @@ mnt_remote_data <- function(mnt_path, remote_name, remote_path, attempt=1,
       # final check
       remnt_result <- remnt_remote_data(mnt_path, remote_name, remote_path,
                                         attempt=attempt,
-                                        max_attempts=max_attempts, trap=FALSE)
+                                        max_attempts=max_attempts)
       # return the result
       return(remnt_result)
     # if the remount fails

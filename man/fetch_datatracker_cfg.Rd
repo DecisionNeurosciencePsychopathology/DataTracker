@@ -18,5 +18,6 @@ fetch_datatracker_cfg(repo, path, gh_root = "", save_to = NA, set_lab = NA)
 \item{set_lab}{Is if you are setting up a new lab/project.}
 }
 \description{
-Function to fetch and set the datatracker config files.
+Function for getting a config file from GitHub. They can be given a specific
+path to be saved to, or set as the user's default lab configuration.
 }

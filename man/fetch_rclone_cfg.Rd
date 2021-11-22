@@ -14,5 +14,8 @@ fetch_rclone_cfg(repo, path, gh_root = "")
 \item{gh_root}{If set to "" will try to access the file from your saved}
 }
 \description{
-Function to get and set an rclone config file.
+This is a more specific function for fetching and saving an rclone config
+file from a private GitHub repo and saving it under the appropriate path to
+be usable by rclone, thus only requiring a one-time setup and then fetching
+the config file.
 }
