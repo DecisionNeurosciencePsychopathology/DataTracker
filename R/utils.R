@@ -616,7 +616,7 @@ DNPLsetup <- function(github_uname, github_token, proj_name=NA,
   fetch_rclone_cfg(repo="Lab_Configs", path="rclone/dnpl.conf",
                    gh_root="DecisionNeurosciencePsychopathology")
   # if setting up a custom project
-  if(proj_name != FALSE) {
+  if(is.na(proj_name) == FALSE) {
     # set the name to what is given
     my_name <- proj_name
   # otherwise
