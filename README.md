@@ -18,10 +18,31 @@ lab.cfg()
 ```
 (Hit 'q' to exit the documentation while in console.)
 
-## Example for Checking Behavioral Data
+## Example for setting up the DNPL Lab using GitHub credentials
 ```r
-# load tidyverse
-library(tidyverse)
+# load the DataTracker library
+library(DataTracker)
+# NOTE: create a GitHub account and get a token before doing this part.
+DNPLsetup(<your username>, <your token>, use_local_cfg=TRUE)
+```
+
+## Example for Checking Behavioral Data (showing easier implementation)
+```r
+# load the DataTracker library
+library(DataTracker)
+# NOTE: you need to run DNPLsetup() before running the following.
+
+# mount Bierka
+mount_Bierka()
+# run a behavioral data check
+h <- have_data(cfg=lab.cfg(), modality='behavior', protocol='bsocial', task='trust', 
+  local_root=path.expand('~'), my_required = c("edat_scan", "text_scan"), drop_failed=TRUE)
+# view your resultant dataframe
+h
+```
+
+## Example for Checking Behavioral Data (showing lower-level implementation)
+```r
 # load the DataTracker library
 library(DataTracker)
 # get the lab's config file path
