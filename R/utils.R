@@ -243,18 +243,21 @@ lab.info <- function() {
 #library(redcapAPI)
 #library(yaml)
 library(assertthat)
-require(httr)
+library(httr)
 library(jsonlite)
 library(lubridate)
 library(tidyverse)
 library(REDCapR)
 library(reticulate)
-require(rlist)
+library(rlist)
 library(R.utils)
 
 ## GLOBAL VARIABLES ##
 
-lab_name <- "DNPL"
+#' Function that simply returns the lab's name
+lab_name <- function() {
+  return("DNPL")
+}
 
 # source our decorators
 #tinsel::source_decoratees("decorators.R")
@@ -272,7 +275,7 @@ lab.cfg <- function(cfg_env=NA) {
   # first try to get cfg from a dot file in user space
   cfg_path <- tryCatch({
     # get the path for the user's local lab config file if set
-    json_path <- path.expand(paste0('~/.', lab_name, '.json'))
+    json_path <- path.expand(paste0('~/.', lab_name(), '.json'))
     # load the string
     cfg_path_attempt <- jsonlite::read_json(json_path)[[1]]
     # Note to the user we are using the personal json config
@@ -285,9 +288,9 @@ lab.cfg <- function(cfg_env=NA) {
     if(is.na(cfg_env) == TRUE) {
       # Note to the user we are trying to get this
       print(paste0("Trying to get the path from the environment variable: ",
-                   lab_name, "."))
+                   lab_name(), "."))
       # try to get the default lab config
-      cfg_path_attempt <- Sys.getenv(lab_name)
+      cfg_path_attempt <- Sys.getenv(lab_name())
       # otherwise, try with the
     } else {
       # Note to the user we are trying to get this
@@ -325,7 +328,7 @@ set_lab.cfg <- function(my_lab=NA, lab_cfg_path=NA) {
   # if a lab is not specified
   if(is.na(my_lab)) {
     # then use the lab name given by this package
-    lab <- lab_name
+    lab <- lab_name()
   # otherwise
   } else {
     # use the lab name given
@@ -334,7 +337,7 @@ set_lab.cfg <- function(my_lab=NA, lab_cfg_path=NA) {
   # if there is not lab_cfg_path given
   if(is.na(lab_cfg_path)) {
     # start by trying to pull it from the global variable set for the lab
-    cfg_path <- Sys.getenv(lab_name)
+    cfg_path <- Sys.getenv(lab_name())
     # if this returns an empty string (is not set)
     if(cfg_path == "") {
       # Note this to the user
@@ -599,7 +602,10 @@ DNPLsetup <- function(github_uname, github_token) {
                    gh_root="DecisionNeurosciencePsychopathology")
   # setup DataTracker (base cfg file for the lab)
   fetch_datatracker_cfg(repo="Lab_Configs", path="datatracker/lab_cfg.json",
-                        gh_root="DecisionNeurosciencePsychopathology")
+                        gh_root="DecisionNeurosciencePsychopathology",
+                        set_lab=TRUE)
+  # Note to the user that the setup should be complete
+  print("DNPL lab setup should be completed.")
 }
 
 #' Function to check if the remote data is mounted.
