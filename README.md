@@ -1,5 +1,14 @@
 # DataTracker
 
+## Requirements
+Install Rclone
+```bash
+curl https://rclone.org/install.sh | sudo bash
+```
+Note: you may need do a manual install of Rclone if the script does not work,
+and you may need to update Fuse or give Rclone permission. If you cannot do this 
+yourself, request help from the Data Team.
+
 ## To Install this package
 ```r
 library(devtools)
