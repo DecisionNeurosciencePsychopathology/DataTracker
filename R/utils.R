@@ -2055,7 +2055,7 @@ get_explore_task_redcap <- function(data, task, ...) {
            paste0('scan_exploretasks___', task)) %>% # get the exact task wanted
     filter(get(paste0('scan_exploretasks___', task)
       ) == 1) %>% # select only items equal to 1
-    distinct() # for some reason we need to drop duplicate entries
+    distinct(.keep_all=TRUE) # for some reason we need to drop duplicate entries
   # return the dataframe
   return(exp_scan_info)
 }
@@ -2069,7 +2069,7 @@ get_explore2_task_redcap <- function(data, task, ...) {
            paste0('scan_exploretasks___', task)) %>% # get the exact task wanted
     filter(get(paste0('scan_exploretasks___', task)
       ) == 1) %>% # select only items equal to 1
-    distinct() # for some reason we need to drop duplicate entries
+    distinct(.keep_all=TRUE) # for some reason we need to drop duplicate entries
   # return the dataframe
   return(exp2_scan_info)
 }
