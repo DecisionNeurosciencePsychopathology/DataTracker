@@ -2187,7 +2187,7 @@ fetch_redcap_data <- function(args_list, redcap_uri=NA, redcap_token=NA) {
     # if the fetch was considered successful
     if(fetch_result$success == TRUE) {
       # return the fetched data
-      return(data)
+      return(fetch_result$data)
     # otherwise
     } else {
       # if the fetch failed, log this
@@ -2205,18 +2205,24 @@ fetch_redcap_data <- function(args_list, redcap_uri=NA, redcap_token=NA) {
   return(fetch_result)
 }
 
-
 #` Function for generating an NDA submission csv
 #` @description
 #` This function will intake subject ids, GUIDs, demo data and
 #` a form name to output a csv formatted for submission to the
 #` NDA requirements.
-#' @return a csv formatted for NDA data submission.
-#' @param ids is a list of the REDCap registration ids.
-#' @param requirements is a list as described in the description.
+#` @return a csv formatted for NDA data submission.
+#` @param ids is a list of the REDCap registration ids.
+#` @param requirements is a list as described in the description.
 #` @export
-get_NDA_submission <- function(cfg, ids, protocol, form, version) {
+get_NDA_submission <- function(cfg, protocol, form, version) {
   # get the NDA data for this protocol
   NDA_cfg <- get_data_path_cfg(cfg, protocol, kword='NDA')
+  # get the protocol url
+  
+  # get the protocol token
+  
+  # drop all subjects without a GUID
+  
+  # 
   
 }
