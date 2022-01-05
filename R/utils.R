@@ -2158,3 +2158,65 @@ mount_Skinner <- function() {
   # return the mount status
   return(mount_status)
 }
+
+#` Function to run an abstract data fetch on a REDCap project.
+#` @description
+#` This function will allow the use of a list in order to
+#` dynamically fetch data from REDCap, as opposed to directly
+#` assigning arguments to the redcap_read_oneshot function.
+#` @return Requested REDCap dataframe or NA.
+#` @param args_list is a list of arguments for redcap_read_oneshot
+#` @param redcap_uri will add/override redcap_uri into args_list
+#` @param redcap_token will add/override token into args_list 
+#` @export
+fetch_redcap_data <- function(args_list, redcap_uri=NA, redcap_token=NA) {
+  # if a redcap uri is manually given
+  if(is.na(redcap_uri) == FALSE) {
+    args_list[['redcap_uri']] = redcap_uri
+  }
+  # if a redcap token is manually given
+  if(is.na(redcap_token) == FALSE) {
+    args_list[['token']] = redcap_token
+  }
+  # error string, if the pull fails
+  err_str <- "Error: REDCap data fetch was not successful."
+  # try to fetch REDCap data using  REDCapR::redcap_read_oneshot
+  fetch_result <- tryCatch({
+    # run the oneshot read using the list
+    request_result <- do.call(redcap_read_oneshot, args_list)
+    # if the fetch was considered successful
+    if(fetch_result$success == TRUE) {
+      # return the fetched data
+      return(data)
+    # otherwise
+    } else {
+      # if the fetch failed, log this
+      print(err_str)
+      # return NA
+      return(NA)
+    }
+  }, error = function(e) {
+    # if the fetch failed, log this
+    print(err_str)
+    # return NA
+    return(NA)
+  })
+  # return the fetch result
+  return(fetch_result)
+}
+
+
+#` Function for generating an NDA submission csv
+#` @description
+#` This function will intake subject ids, GUIDs, demo data and
+#` a form name to output a csv formatted for submission to the
+#` NDA requirements.
+#' @return a csv formatted for NDA data submission.
+#' @param ids is a list of the REDCap registration ids.
+#' @param requirements is a list as described in the description.
+#` @export
+get_NDA_submission <- function(cfg, ids, protocol, form, version) {
+  # get the NDA data for this protocol
+  NDA_cfg <- get_data_path_cfg(cfg, protocol, kword='NDA')
+  
+}
