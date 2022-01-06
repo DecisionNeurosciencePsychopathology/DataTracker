@@ -2032,7 +2032,16 @@ have_daxmeson_data <- function(cfg, protocol, task,  local_root='',
 #' Function to check for existence of bids data.
 have_bids_data <- function(cfg, protocol, task, local_root='',
                            data_path=NA) {
-
+  # use reticulate to source PyBIDS python package
+  BIDSLayout <- import('bids')$BIDSLayout
+  # use PyBIDS to querry the data
+  layout <- BIDSLayout('/bgfs/adombrovski/DNPL_DataMesh/Data/PNDA/data_BIDS')
+  # convert PyBIDS result to a dataframe
+  bids_df <- layout$to_df()
+  # get the required data
+  required <- get_task_completion_requirements(cfg=cfg, task=task,
+                                               modality="bids")
+  #
 }
 
 #' Function to filter the bsocial scan data by task.
@@ -2219,20 +2228,95 @@ fetch_redcap_data <- function(args_list, redcap_uri=NA, redcap_token=NA) {
 #` @description
 #` This function will intake subject ids, GUIDs, demo data and
 #` a form name to output a csv formatted for submission to the
-#` NDA requirements.
+#` NDA requirements. Specifically, this is designed for data of
+#` the 'Clinical Assessment' category.
 #` @return a csv formatted for NDA data submission.
-#` @param ids is a list of the REDCap registration ids.
-#` @param requirements is a list as described in the description.
+#` @param cfg
+#` @param protocol
+#` @param form 
+#` @param output_path 
 #` @export
-get_NDA_submission <- function(cfg, protocol, form, version) {
+get_NDA_submission <- function(cfg, protocol, form, output_path='.') {
   # get the NDA data for this protocol
-  NDA_cfg <- get_data_path_cfg(cfg, protocol, kword='NDA')
-  # get the protocol url
-  
-  # get the protocol token
-  
+  NDA_cfg <- get_data_path_cfg(cfg, protocol, kword='nda')
+  # access the form we want for submission
+  NDA_cfg <- NDA_cfg[[form]]
+  # get the masterdemo object
+  masterdemo <- get_masterdemo(cfg_path)
+  # get the protocol object
+  project <- get_project(cfg_path, protocol)
+  # get the masterdemo data required
+  md_data <- fetch_redcap_data(NDA_cfg$md_fields, 
+                               redcap_uri=masterdemo$redcap_uri, 
+                               redcap_token=masterdemo$token)
+  # get the protocol data required
+  protocol_data <- fetch_redcap_data(NDA_cfg$protocol_fields, 
+                               redcap_uri=project$redcap_uri, 
+                               redcap_token=project$token)
+  # merge the masterdemo and protocol by id
+  merged_dataframe <- merge(md_data,
+                          protocol_data,
+                          by=c("registration_redcapid"))
   # drop all subjects without a GUID
-  
-  # 
-  
+  merged_dataframe <- merged_dataframe %>%
+    filter()
+  # get the age of the person in months (required by NDA)
+  merged_dataframe <- merged_dataframe %>% 
+    mutate(interview_age = lubridate::day(
+      lubridate::as.period((reg_condate_bsocial - registration_dob)))) %>%
+    # divide by average number of days in a month and round
+    mutate(interview_age = round(interview_age/30.4167))
+  # created a named list to store the info for renaming
+  # Items not in this list's names will be dropped
+  # Items whose key do not match their value will be renamed
+  # NOTE: abstracted out in the config file
+  redcap2nda <- NDA_cfg$redcap2nda
+  # drop items from redcap that are not required
+  columns2keep <- names(redcap2nda)
+  merged_dataframe <- merged_dataframe %>%
+    select(one_of(columns2keep))
+  # rename the items
+  data.table::setnames(merged_dataframe, 
+                     old = columns2keep, 
+                     new = unlist(redcap2nda))
+  # Will expect usual variables for NDA clinical assessments to
+  # be included/set from here, example: interview_date.
+  # convert dates to strings
+  merged_dataframe <- merged_dataframe %>% 
+    # extract the year, month, and data as their own columns
+    mutate(interview_date_month = lubridate::month(interview_date), 
+         interview_date_day = lubridate::day(interview_date), 
+         interview_date_year = lubridate::year(interview_date)) %>% 
+  # concatentate the dates as "MM/DD/YYYY"
+  mutate(interview_date = paste(sprintf("%02d", interview_date_month), 
+                                sprintf("%02d", interview_date_day), 
+                                interview_date_year, 
+                                sep='/')) %>%
+  # drop the extra interview date columns created
+  select(-interview_date_month, 
+         -interview_date_day, 
+         -interview_date_year)
+  # make the first row (form and version plus a bunch of commas)
+  # create a list of empty strings the same length as the number of columns
+  first_col <- rep("", ncol(merged_dataframe))
+  # make the first element the form name
+  first_col[1] <- NDA_cfg$name
+  # make the second element the version number
+  first_col[2] <- NDA_cfg$version
+  # paste into a single string by commas
+  first_col <- paste(first_col, sep=',', collapse=',')
+  # add a line delimiter to the end of the string
+  first_col <- paste0(first_col, '\n')
+  # generate the output csv
+  # get the csv as a string
+  csv_str <- format_csv(merged_dataframe)
+  # add the first row
+  csv_str <- paste0(first_col, csv_str)
+  # get a date stamp
+  date_str <- str_replace_all(str_split
+                            (toString(lubridate::now()), ' ')[[1]][1],
+                            '-', '_')
+  # print out the csv
+  write_file(csv_str, file=paste0(output_path, "/", protocol, 
+                                  "_nda_", date_str, ".csv"))
 }
