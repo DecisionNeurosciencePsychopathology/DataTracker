@@ -2178,6 +2178,16 @@ fetch_redcap_data <- function(args_list, redcap_uri=NA, redcap_token=NA) {
   if(is.na(redcap_token) == FALSE) {
     args_list[['token']] = redcap_token
   }
+  # acceptable arguments to redcap_read_oneshot
+  func_args <- rlang::fn_fmls_names(redcap_read_oneshot)
+  # check that the arguments given for the function to be run are acceptable
+  if(all(names(args_list) %in% func_args) == FALSE) {
+    # note this to the user
+    print("Error: you gave an improper argument(s) to 'redcap_read_oneshot':")
+    print(setdiff(names(args_list), func_args))
+    # return NA
+    return(NA)
+  }
   # error string, if the pull fails
   err_str <- "Error: REDCap data fetch was not successful."
   # try to fetch REDCap data using  REDCapR::redcap_read_oneshot
@@ -2185,10 +2195,10 @@ fetch_redcap_data <- function(args_list, redcap_uri=NA, redcap_token=NA) {
     # run the oneshot read using the list
     request_result <- do.call(redcap_read_oneshot, args_list)
     # if the fetch was considered successful
-    if(fetch_result$success == TRUE) {
+    if(request_result$success == TRUE) {
       # return the fetched data
-      return(fetch_result$data)
-    # otherwise
+      return(request_result$data)
+      # otherwise
     } else {
       # if the fetch failed, log this
       print(err_str)
