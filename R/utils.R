@@ -2257,13 +2257,21 @@ get_NDA_submission <- function(cfg, protocol, form, output_path='.') {
   merged_dataframe <- merge(md_data,
                           protocol_data,
                           by=c("registration_redcapid"))
+  # get the GUID redcap variable name
+  guid_var <- NDA_cfg$guid_field
   # drop all subjects without a GUID
   merged_dataframe <- merged_dataframe %>%
-    filter()
+    filter(is.na(get("registration_ndaguid")) == FALSE)
+  # get the visit date variable
+  visit_date_var <- NDA_cfg$visit_date_field
+  # get the dob variable
+  dob_var <- NDA_cfg$dob_field
   # get the age of the person in months (required by NDA)
   merged_dataframe <- merged_dataframe %>% 
     mutate(interview_age = lubridate::day(
-      lubridate::as.period((reg_condate_bsocial - registration_dob)))) %>%
+      lubridate::as.period(
+        (get(visit_date_var) - get(dob_var))))
+      ) %>%
     # divide by average number of days in a month and round
     mutate(interview_age = round(interview_age/30.4167))
   # created a named list to store the info for renaming
@@ -2287,7 +2295,7 @@ get_NDA_submission <- function(cfg, protocol, form, output_path='.') {
     mutate(interview_date_month = lubridate::month(interview_date), 
          interview_date_day = lubridate::day(interview_date), 
          interview_date_year = lubridate::year(interview_date)) %>% 
-  # concatentate the dates as "MM/DD/YYYY"
+  # concatenate the dates as "MM/DD/YYYY"
   mutate(interview_date = paste(sprintf("%02d", interview_date_month), 
                                 sprintf("%02d", interview_date_day), 
                                 interview_date_year, 
