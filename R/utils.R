@@ -45,6 +45,8 @@
 #' -----------------------------------------------------------------------------
 #'
 #' Current Maintainers:
+#`
+#`   Bea Langer: langerbe<at>upmc.edu
 #'
 #'   Shane Buckley: tshanebuckley<at>gmail.com
 #'
