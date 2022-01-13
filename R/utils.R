@@ -1662,7 +1662,7 @@ backup_redcap <- function(cfg, protocol, out_dir=getwd(), mnt_path=NA,
   # get a timestamp for the output csv
   tm_stamp <- get_time_stamp(include_timestamp)
   # get the full path of where to save the data to
-  full_out_path <- paste0(out_dir, '/', tm_stamp, "redcap_backup.csv")
+  full_out_path <- paste0(out_dir, '/', tm_stamp, "_", protocol, "_redcap_backup.csv")
   # save the csv
   write.csv(rc_data, full_out_path)
 }
