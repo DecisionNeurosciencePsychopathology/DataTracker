@@ -540,8 +540,11 @@ fetch_rclone_cfg <- function(repo, path, gh_root="", archive_old=TRUE) {
     if(archive_old == TRUE) {
       # get a timestamp
       ts = get_time_stamp()
+      # get the new file path with timestamp
+      new_path <- paste0(
+        dirname(rclone_cfg_path), ts, '_', basename(rclone_cfg_path))
       # rename the file with the timestamp
-      file.rename(rclone_cfg_path, paste0(ts, '_', rclone_cfg_path))
+      file.rename(rclone_cfg_path, new_path)
     # otherwise
     } else {
       # delete the old file
@@ -588,8 +591,11 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
     if(archive_old == TRUE) {
       # get a timestamp
       ts = get_time_stamp()
+      # get the new file path with timestamp
+      new_path <- paste0(
+        dirname(datatracker_cfg_path), ts, '_', basename(datatracker_cfg_path))
       # rename the file with the timestamp
-      file.rename(datatracker_cfg_path, paste0(ts, '_', datatracker_cfg_path))
+      file.rename(datatracker_cfg_path, new_path)
     } else {
       # delete the old file
       file.remove(datatracker_cfg_path)
