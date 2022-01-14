@@ -564,7 +564,7 @@ fetch_rclone_cfg <- function(repo, path, gh_root="", archive_old=TRUE) {
 #' @export
 fetch_datatracker_cfg <- function(repo, path, gh_root="",
                                   save_to=NA, set_lab=NA, set_local=FALSE,
-                                  archive_old == TRUE) {
+                                  archive_old=TRUE) {
   # if a path to save the file under is not given
   if(is.na(save_to)) {
     # set this to the home directory
