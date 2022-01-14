@@ -527,7 +527,7 @@ fetch_github_data <- function(repo, path, gh_root="") {
 #' @param path Is the path in the repo to the file.
 #' @param gh_root If set to "" will try to access the file from your saved
 #' @export
-fetch_rclone_cfg <- function(repo, path, gh_root="") {
+fetch_rclone_cfg <- function(repo, path, gh_root="", archive_old=TRUE) {
   # get the file text from a remote GitHub
   raw_rclone_txt <- fetch_github_data(repo, path, gh_root)
   # get the local file path to save it under
@@ -536,8 +536,17 @@ fetch_rclone_cfg <- function(repo, path, gh_root="") {
   dir.create(dirname(rclone_cfg_path), recursive=TRUE)
   # if the file currently exists
   if(file.exists(rclone_cfg_path)) {
-    # delete the old file
-    file.remove(rclone_cfg_path)
+    # if saving old configs
+    if(archive_old == TRUE) {
+      # get a timestamp
+      ts = get_time_stamp()
+      # rename the file with the timestamp
+      file.rename(rclone_cfg_path, paste0(ts, '_', rclone_cfg_path))
+    # otherwise
+    } else {
+      # delete the old file
+      file.remove(rclone_cfg_path)
+    }
   }
   # write the rclone config file
   write_file(raw_rclone_txt, rclone_cfg_path)
@@ -554,7 +563,8 @@ fetch_rclone_cfg <- function(repo, path, gh_root="") {
 #' @param set_lab Is if you are setting up a new lab/project.
 #' @export
 fetch_datatracker_cfg <- function(repo, path, gh_root="",
-                                  save_to=NA, set_lab=NA, set_local=FALSE) {
+                                  save_to=NA, set_lab=NA, set_local=FALSE,
+                                  archive_old == TRUE) {
   # if a path to save the file under is not given
   if(is.na(save_to)) {
     # set this to the home directory
@@ -574,8 +584,16 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
   })
   # if the file currently exists
   if(file.exists(datatracker_cfg_path)) {
-    # delete the old file
-    file.remove(datatracker_cfg_path)
+    # if saving old configs
+    if(archive_old == TRUE) {
+      # get a timestamp
+      ts = get_time_stamp()
+      # rename the file with the timestamp
+      file.rename(datatracker_cfg_path, paste0(ts, '_', datatracker_cfg_path))
+    } else {
+      # delete the old file
+      file.remove(datatracker_cfg_path)
+    }
   }
   # write the datatracker config file
   write_file(raw_cfg_txt, datatracker_cfg_path)
@@ -610,10 +628,13 @@ fetch_datatracker_cfg <- function(repo, path, gh_root="",
 #' @examples
 #' set_github_creds(github_uname=<username>, github_token=<token>)
 #' @export
-DNPLsetup <- function(github_uname, github_token, proj_name=NA,
-                      use_local_cfg=FALSE) {
-  # set the GitHub credentials
-  set_github_creds(username=github_uname, token=github_token)
+DNPLsetup <- function(github_uname=NA, github_token=NA, proj_name=NA,
+                      use_local_cfg=FALSE, rerun=FALSE) {
+  # if re-setting up the project
+  if(rerun == FALSE) {
+    # set the GitHub credentials
+    set_github_creds(username=github_uname, token=github_token)
+  }
   # setup Rclone (base Rclone setup for DNPL: Bierka and Skinner)
   fetch_rclone_cfg(repo="Lab_Configs", path="rclone/dnpl.conf",
                    gh_root="DecisionNeurosciencePsychopathology")
